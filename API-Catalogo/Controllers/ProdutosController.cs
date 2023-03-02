@@ -31,7 +31,7 @@ namespace API_Catalogo.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
             }
         }
-        [HttpGet("{id:int}", Name = "ObterProduto")]
+        [HttpGet("{id:int:min(1)}", Name = "ObterProduto")]
 
         public ActionResult<Produto> Get(int id)
         {
@@ -70,7 +70,7 @@ namespace API_Catalogo.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int:min(1)}")]
         public ActionResult Put(int id, Produto produto)
         {
             try
@@ -91,7 +91,7 @@ namespace API_Catalogo.Controllers
             }
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int:min(1)}")]
         public ActionResult Delete(int id)
         {
             try

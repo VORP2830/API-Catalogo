@@ -34,7 +34,7 @@ namespace API_Catalogo.Controllers
             }
         }
 
-        [HttpGet("{id:int}", Name = "ObterCategoria")]
+        [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
             try
@@ -87,7 +87,7 @@ namespace API_Catalogo.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int:min(1)}")]
         public ActionResult Put(Categoria categoria) 
         {
             try
@@ -108,7 +108,7 @@ namespace API_Catalogo.Controllers
             }
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int:min(1)}")]
         public ActionResult Delete(int id)
         {
             try
