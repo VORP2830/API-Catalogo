@@ -17,64 +17,99 @@ namespace API_Catalogo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Produto>> Get()
         {
-            var produtos = _context.Produtos.ToList();
-            if (produtos is null)
+            try
             {
-                return NotFound("Produtos não encontrados");
+                var produtos = _context.Produtos.AsNoTracking().ToList();
+                if (produtos is null)
+                {
+                    return NotFound("Produtos não encontrados");
+                }
+                return produtos;
             }
-            return produtos;
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
+            }
         }
         [HttpGet("{id:int}", Name = "ObterProduto")]
 
         public ActionResult<Produto> Get(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
-            if (produto is null)
+            try
             {
-                return NotFound("Produto não encontrado");
+                var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+                if (produto is null)
+                {
+                    return NotFound("Produto não encontrado");
+                }
+                return produto;
             }
-            return produto;
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
+            }
         }
 
         [HttpPost]
         public ActionResult Post(Produto produto)
         {
-            if (produto is null)
+            try
             {
-                return BadRequest();
-            }
-            _context.Produtos.Add(produto);
-            _context.SaveChanges();
+                if (produto is null)
+                {
+                    return BadRequest();
+                }
+                _context.Produtos.Add(produto);
+                _context.SaveChanges();
 
-            return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
+                return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
+            }
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Produto produto)
         {
-            if (id != produto.ProdutoId)
+            try
             {
-                return BadRequest();
+                if (id != produto.ProdutoId)
+                {
+                    return BadRequest();
+                }
+
+                _context.Entry(produto).State = EntityState.Modified;
+                _context.SaveChanges();
+
+                return Ok();
             }
-
-            _context.Entry(produto).State = EntityState.Modified;
-            _context.SaveChanges();
-
-            return Ok();
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
+            }
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
-            if (produto is null)
+            try
             {
-                return NotFound("Produto não encontrado");
-            }
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
+                var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+                if (produto is null)
+                {
+                    return NotFound("Produto não encontrado");
+                }
+                _context.Produtos.Remove(produto);
+                _context.SaveChanges();
 
-            return Ok(produto);
+                return Ok(produto);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
+            }
         }
     }
 }
