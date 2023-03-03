@@ -11,8 +11,8 @@ namespace API_Catalogo.Models
         }
         [Key]
         public int CategoriaId { get; set; }
-        [Required]
-        [StringLength(80)]
+        [Required(ErrorMessage = "O nome é obrigatorio")]
+        [StringLength(30, ErrorMessage = "O nome deve ter no maximo {1} caracteres")]
         public string? Nome { get; set; }
         [Required]
         [StringLength(300)]
