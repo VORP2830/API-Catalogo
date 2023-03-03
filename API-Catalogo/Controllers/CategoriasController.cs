@@ -16,11 +16,11 @@ namespace API_Catalogo.Controllers
             _context = context;
         }
         [HttpGet]
-        public ActionResult<IEnumerable<Categoria>> Get()
+        public async Task<ActionResult<IEnumerable<Categoria>>> Get()
         {
             try
             {
-                var categorias = _context.Categorias.AsNoTracking().ToList();
+                var categorias = await _context.Categorias.AsNoTracking().ToListAsync();
                 if (categorias is null)
                 {
                     return NotFound("Categorias não encontradas");
@@ -35,11 +35,11 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")]
-        public ActionResult<Categoria> Get(int id)
+        public async Task<ActionResult<Categoria>> Get(int id)
         {
             try
             {
-                var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+                var categoria = await _context.Categorias.FirstOrDefaultAsync(p => p.CategoriaId == id);
                 if (categoria is null)
                 {
                     return NotFound("Categoria não encontrada");
@@ -54,11 +54,11 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
+        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasProdutos()
         {
             try
             {
-                return _context.Categorias.Include(p => p.Produtos).AsNoTracking().ToList();
+                return await _context.Categorias.Include(p => p.Produtos).AsNoTracking().ToListAsync();
             }
             catch (Exception)
             {
@@ -68,7 +68,7 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(Categoria categoria)
+        public async Task<ActionResult> Post(Categoria categoria)
         {
             try
             {
@@ -76,8 +76,8 @@ namespace API_Catalogo.Controllers
                 {
                     return BadRequest();
                 }
-                _context.Categorias.Add(categoria);
-                _context.SaveChanges();
+                await _context.Categorias.AddAsync(categoria);
+                await _context.SaveChangesAsync();
                 return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
             }
             catch (Exception)
@@ -88,7 +88,7 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult Put(Categoria categoria) 
+        public async Task<ActionResult> Put(Categoria categoria) 
         {
             try
             {
@@ -97,7 +97,7 @@ namespace API_Catalogo.Controllers
                     return BadRequest();
                 }
                 _context.Entry(categoria).State = EntityState.Modified;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return Ok();
 
             }
@@ -109,17 +109,17 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpDelete("{id:int:min(1)}")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
-                var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+                var categoria = await _context.Categorias.FirstOrDefaultAsync(p => p.CategoriaId == id);
                 if (categoria is null)
                 {
                     return NotFound("Categoria não encontrada");
                 }
                 _context.Categorias.Remove(categoria);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync(); 
                 return Ok(categoria);
             }
             catch (Exception)
