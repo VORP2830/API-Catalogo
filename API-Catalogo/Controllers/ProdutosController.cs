@@ -1,4 +1,5 @@
 ﻿using API_Catalogo.Context;
+using API_Catalogo.Filters;
 using API_Catalogo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ namespace API_Catalogo.Controllers
             _context = context;
         }
         [HttpGet]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<IEnumerable<Produto>>> Get()
         {
             try

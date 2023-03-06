@@ -14,7 +14,7 @@ namespace API_Catalogo.Models
         [Required(ErrorMessage = "O nome é obrigatorio")]
         [StringLength(30, ErrorMessage = "O nome deve ter no maximo {1} caracteres")]
         public string? Nome { get; set; }
-        [Required]
+        [Required(ErrorMessage = "É obrigatorio ter uma imagem")]
         [StringLength(300)]
         public string? ImagemUrl { get; set; }  
         public ICollection<Produto>? Produtos { get; set; }

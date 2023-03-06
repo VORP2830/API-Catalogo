@@ -1,4 +1,5 @@
 using API_Catalogo.Context;
+using API_Catalogo.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -11,7 +12,7 @@ builder.Services.AddControllers().
     options.
     JsonSerializerOptions.
     ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
+builder.Services.AddScoped<ApiLoggingFilter, ApiLoggingFilter>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
