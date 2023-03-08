@@ -2,6 +2,7 @@
 using API_Catalogo.DTOs;
 using API_Catalogo.Filters;
 using API_Catalogo.Models;
+using API_Catalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API_Catalogo.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase
     {
@@ -29,11 +30,11 @@ namespace API_Catalogo.Controllers
         }
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get()
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
             try
             {
-                var produtos = _uof.ProdutoRepository.Get().ToList();
+                var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters).ToList();
                 var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
 
                 if (produtos is null)
