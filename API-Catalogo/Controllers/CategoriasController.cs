@@ -80,13 +80,17 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] CategoriaDTO categoriaDto)
+        public async Task<ActionResult> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
                 var categoria = _mapper.Map<Categoria>(categoriaDto);
+                if (categoria == null)
+                {
+                    return BadRequest();
+                }
                 _uof.CategoriaRepository.Add(categoria);
-                _uof.Commit();
+                await _uof.Commit();
 
                 var categoriaDtoOutput = _mapper.Map<CategoriaDTO>(categoria);
                 return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoriaDtoOutput);

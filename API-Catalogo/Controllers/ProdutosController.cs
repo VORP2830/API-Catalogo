@@ -67,13 +67,13 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody]ProdutoDTO produtoDto)
+        public async Task<ActionResult> Post([FromBody]ProdutoDTO produtoDto)
         {
             try
             {
                 var produto = _mapper.Map<Produto>(produtoDto);
                 _uof.ProdutoRepository.Add(produto);
-                _uof.Commit();
+                await _uof.Commit();
 
                 var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
 
@@ -86,7 +86,7 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult Put(int id,[FromBody] ProdutoDTO produtoDto)
+        public async Task<ActionResult> Put(int id,[FromBody] ProdutoDTO produtoDto)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace API_Catalogo.Controllers
                 var produto = _mapper.Map<Produto>(produtoDto);
 
                 _uof.ProdutoRepository.Update(produto);
-                _uof.Commit();
+                await _uof.Commit();
 
                 return Ok();
             }
