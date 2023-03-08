@@ -3,11 +3,8 @@ using APICatalogo.Repository;
 
 namespace API_Catalogo.Repository
 {
-    public interface ICategoriaRepository
+    public interface ICategoriaRepository : IRepository<Categoria>
     {
-        interface ICategoriaRepository : IRepository<Categoria>
-        {
-            IEnumerable<Categoria> GetCategoriasProduto();
-        }
+            Task<IEnumerable<Categoria>> GetCategoriasProdutos();
     }
 }

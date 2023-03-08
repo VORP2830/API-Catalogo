@@ -1,64 +1,77 @@
-﻿using API_Catalogo.Context;
+﻿using API_Catalogo.DTOs;
+using API_Catalogo.Filters;
 using API_Catalogo.Models;
-using Microsoft.AspNetCore.Http;
+using APICatalogo.Repository;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API_Catalogo.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public CategoriasController(AppDbContext context)
+        private readonly IUnitOfWork _uof;
+        private readonly IMapper _mapper;
+        public CategoriasController(IUnitOfWork uof, IMapper mapper)
         {
-            _context = context;
+            _uof = uof;
+            _mapper = mapper;
         }
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Categoria>>> Get()
+        [ServiceFilter(typeof(ApiLoggingFilter))]
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get()
         {
             try
             {
-                var categorias = await _context.Categorias.AsNoTracking().ToListAsync();
-                if (categorias is null)
+                var categorias = _uof.CategoriaRepository.Get().ToList();
+                var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+
+                if (categorias is null || !categorias.Any())
                 {
                     return NotFound("Categorias não encontradas");
                 }
-                return categorias;
+
+                return categoriasDto;
             }
             catch (Exception)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
             }
         }
 
         [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")]
-        public async Task<ActionResult<Categoria>> Get(int id)
+        public async Task<ActionResult<CategoriaDTO>> Get(int id)
         {
             try
             {
-                var categoria = await _context.Categorias.FirstOrDefaultAsync(p => p.CategoriaId == id);
+                var categoria = await _uof.CategoriaRepository.GetById(x => x.CategoriaId == id);
                 if (categoria is null)
                 {
                     return NotFound("Categoria não encontrada");
                 }
-                return categoria;
+                var categoriaDto = _mapper.Map<CategoriaDTO>(categoria);
+                return categoriaDto;
             }
             catch (Exception)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
             }
         }
 
-        [HttpGet("produtos")]
-        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasProdutos()
+        [HttpGet("{categoriaId:int:min(1)}/produtos")]
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasProdutos()
         {
             try
             {
-                return await _context.Categorias.Include(p => p.Produtos).AsNoTracking().ToListAsync();
+                var categorias = await _uof.CategoriaRepository.GetCategoriasProdutos();
+                if(categorias is null)
+                {
+                    return NotFound("Não existem categorias");
+                }
+                var ctaegoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+                return ctaegoriasDto;
             }
             catch (Exception)
             {
@@ -67,42 +80,41 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post(Categoria categoria)
+        public ActionResult Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
-                if (categoria is null)
-                {
-                    return BadRequest();
-                }
-                await _context.Categorias.AddAsync(categoria);
-                await _context.SaveChangesAsync();
-                return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
+                var categoria = _mapper.Map<Categoria>(categoriaDto);
+                _uof.CategoriaRepository.Add(categoria);
+                _uof.Commit();
+
+                var categoriaDtoOutput = _mapper.Map<CategoriaDTO>(categoria);
+                return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoriaDtoOutput);
             }
             catch (Exception)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
             }
         }
-
         [HttpPut("{id:int:min(1)}")]
-        public async Task<ActionResult> Put(Categoria categoria) 
+        public async Task<ActionResult> Put(int id, [FromBody] ProdutoDTO produtoDto)
         {
             try
             {
-                if (categoria is null)
+                if (id != produtoDto.ProdutoId)
                 {
-                    return BadRequest();
+                    return BadRequest($"Não foi possível atualizar o produto com id={id}");
                 }
-                _context.Entry(categoria).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-                return Ok();
 
+                var produto = _mapper.Map<Produto>(produtoDto);
+
+                _uof.ProdutoRepository.Update(produto);
+                await _uof.Commit();
+
+                return Ok($"Produto com id={id} foi atualizado com sucesso.");
             }
             catch (Exception)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
             }
         }
@@ -112,21 +124,21 @@ namespace API_Catalogo.Controllers
         {
             try
             {
-                var categoria = await _context.Categorias.FirstOrDefaultAsync(p => p.CategoriaId == id);
-                if (categoria is null)
+                var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
+                if (produto is null)
                 {
-                    return NotFound("Categoria não encontrada");
+                    return NotFound($"Produto com id={id} não encontrado.");
                 }
-                _context.Categorias.Remove(categoria);
-                await _context.SaveChangesAsync(); 
-                return Ok(categoria);
+
+                _uof.ProdutoRepository.Delete(produto);
+                await _uof.Commit();
+
+                return Ok($"Produto com id={id} foi excluído com sucesso.");
             }
             catch (Exception)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
             }
         }
-
     }
 }

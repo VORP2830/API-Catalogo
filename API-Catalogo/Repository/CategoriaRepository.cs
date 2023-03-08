@@ -11,9 +11,9 @@ namespace API_Catalogo.Repository
         {
         }
 
-        public IEnumerable<Categoria> GetCategoriaPordutos() 
+        public async Task<IEnumerable<Categoria>> GetCategoriasProdutos()
         {
-            return Get().Include(x => x.Produtos);
+            return Get().Include(x => x.Produtos).ToList();
         }
 
     }

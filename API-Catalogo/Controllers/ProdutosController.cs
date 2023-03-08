@@ -1,7 +1,9 @@
 ﻿using API_Catalogo.Context;
+using API_Catalogo.DTOs;
 using API_Catalogo.Filters;
 using API_Catalogo.Models;
 using APICatalogo.Repository;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,27 +14,33 @@ namespace API_Catalogo.Controllers
     public class ProdutosController : ControllerBase
     {
         private readonly IUnitOfWork _uof;
-        public ProdutosController(IUnitOfWork context)
+        private readonly IMapper _mapper;
+        public ProdutosController(IUnitOfWork context, IMapper mapper)
         {
             _uof = context;
+            _mapper = mapper;
         }
         [HttpGet("menorpreco")]
-        public ActionResult<IEnumerable<Produto>> GetProdutosPreco()
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
         {
-            return _uof.ProdutoRepository.GetProdutoPorPreco().ToList();
+            var produtos = _uof.ProdutoRepository.GetProdutoPorPreco().ToList();
+            var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
+            return produtosDto;
         }
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<Produto>> Get()
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get()
         {
             try
             {
                 var produtos = _uof.ProdutoRepository.Get().ToList();
+                var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
+
                 if (produtos is null)
                 {
                     return NotFound("Produtos não encontrados");
                 }
-                return produtos;
+                return produtosDto;
             }
             catch (Exception)
             {
@@ -40,7 +48,7 @@ namespace API_Catalogo.Controllers
             }
         }
         [HttpGet("{id:int:min(1)}", Name = "ObterProduto")]
-        public async Task<ActionResult<Produto>> Get(int id)
+        public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
             try
             {
@@ -49,7 +57,8 @@ namespace API_Catalogo.Controllers
                 {
                     return NotFound("Produto não encontrado");
                 }
-                return produto;
+                var produtoDto = _mapper.Map<ProdutoDTO>(produto);
+                return produtoDto;
             }
             catch (Exception)
             {
@@ -58,18 +67,17 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(Produto produto)
+        public ActionResult Post([FromBody]ProdutoDTO produtoDto)
         {
             try
             {
-                if (produto is null)
-                {
-                    return BadRequest();
-                }
+                var produto = _mapper.Map<Produto>(produtoDto);
                 _uof.ProdutoRepository.Add(produto);
                 _uof.Commit();
 
-                return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
+                var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
+
+                return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produtoDTO);
             }
             catch (Exception)
             {
@@ -78,14 +86,15 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult Put(int id, Produto produto)
+        public ActionResult Put(int id,[FromBody] ProdutoDTO produtoDto)
         {
             try
             {
-                if (id != produto.ProdutoId)
+                if (id != produtoDto.ProdutoId)
                 {
                     return BadRequest();
                 }
+                var produto = _mapper.Map<Produto>(produtoDto);
 
                 _uof.ProdutoRepository.Update(produto);
                 _uof.Commit();
@@ -99,7 +108,7 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpDelete("{id:int:min(1)}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult<ProdutoDTO>> Delete(int id)
         {
             try
             {
@@ -111,7 +120,9 @@ namespace API_Catalogo.Controllers
                 _uof.ProdutoRepository.Delete(produto);
                 await _uof.Commit();
 
-                return Ok(produto);
+                var produtoDto = _mapper.Map<ProdutoDTO>(produto);
+
+                return Ok(produtoDto);
             }
             catch (Exception)
             {
