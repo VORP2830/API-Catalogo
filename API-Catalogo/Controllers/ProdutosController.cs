@@ -1,6 +1,7 @@
 ﻿using API_Catalogo.Context;
 using API_Catalogo.Filters;
 using API_Catalogo.Models;
+using APICatalogo.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,18 +11,23 @@ namespace API_Catalogo.Controllers
     [ApiController]
     public class ProdutosController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public ProdutosController(AppDbContext context)
+        private readonly IUnitOfWork _uof;
+        public ProdutosController(IUnitOfWork context)
         {
-            _context = context;
+            _uof = context;
+        }
+        [HttpGet("menorpreco")]
+        public ActionResult<IEnumerable<Produto>> GetProdutosPreco()
+        {
+            return _uof.ProdutoRepository.GetProdutoPorPreco().ToList();
         }
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<Produto>>> Get()
+        public ActionResult<IEnumerable<Produto>> Get()
         {
             try
             {
-                var produtos = await _context.Produtos.AsNoTracking().ToListAsync();
+                var produtos = _uof.ProdutoRepository.Get().ToList();
                 if (produtos is null)
                 {
                     return NotFound("Produtos não encontrados");
@@ -34,12 +40,11 @@ namespace API_Catalogo.Controllers
             }
         }
         [HttpGet("{id:int:min(1)}", Name = "ObterProduto")]
-
         public async Task<ActionResult<Produto>> Get(int id)
         {
             try
             {
-                var produto = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(p => p.ProdutoId == id);
+                var produto = await _uof.ProdutoRepository.GetById(x => x.ProdutoId == id);
                 if (produto is null)
                 {
                     return NotFound("Produto não encontrado");
@@ -53,7 +58,7 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post(Produto produto)
+        public ActionResult Post(Produto produto)
         {
             try
             {
@@ -61,8 +66,8 @@ namespace API_Catalogo.Controllers
                 {
                     return BadRequest();
                 }
-                await _context.Produtos.AddAsync(produto);
-                await _context.SaveChangesAsync();
+                _uof.ProdutoRepository.Add(produto);
+                _uof.Commit();
 
                 return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
             }
@@ -73,7 +78,7 @@ namespace API_Catalogo.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public async Task<ActionResult> Put(int id, Produto produto)
+        public ActionResult Put(int id, Produto produto)
         {
             try
             {
@@ -82,8 +87,8 @@ namespace API_Catalogo.Controllers
                     return BadRequest();
                 }
 
-                _context.Entry(produto).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                _uof.ProdutoRepository.Update(produto);
+                _uof.Commit();
 
                 return Ok();
             }
@@ -98,13 +103,13 @@ namespace API_Catalogo.Controllers
         {
             try
             {
-                var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.ProdutoId == id);
+                var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
                 if (produto is null)
                 {
                     return NotFound("Produto não encontrado");
                 }
-                _context.Produtos.Remove(produto);
-                await _context.SaveChangesAsync();
+                _uof.ProdutoRepository.Delete(produto);
+                await _uof.Commit();
 
                 return Ok(produto);
             }

@@ -62,7 +62,6 @@ namespace API_Catalogo.Controllers
             }
             catch (Exception)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro no sistema!");
             }
         }
