@@ -1,6 +1,4 @@
-﻿using API_Catalogo.Validations;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace API_Catalogo.Models
@@ -40,6 +38,7 @@ namespace API_Catalogo.Models
                         );
                 }
             }
+
             if(this.Estoque < 0)
             {
                 yield return new
