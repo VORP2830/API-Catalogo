@@ -27,7 +27,7 @@ namespace API_Catalogo.Controllers
         {
             try
             {
-                var categorias = _uof.CategoriaRepository.GetCategoriasPaginas(categoriasParameters);
+                var categorias = await _uof.CategoriaRepository.GetCategoriasPaginas(categoriasParameters);
                 if (categorias is null)
                 {
                     return NotFound("Categorias não encontradas");

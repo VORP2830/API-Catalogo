@@ -12,16 +12,16 @@ namespace API_Catalogo.Repository
         {
         }
 
-        public PagedList<Categoria> GetCategoriasPaginas(CategoriasParameters categoriasParameters)
+        public async Task<PagedList<Categoria>> GetCategoriasPaginas(CategoriasParameters categoriasParameters)
         {
-            return PagedList<Categoria>.ToPagedList(Get().OrderBy(x => x.Nome),
+            return await PagedList<Categoria>.ToPagedList(Get().OrderBy(x => x.Nome),
                 categoriasParameters.PageNumber,
                 categoriasParameters.PageSize);
         }
 
         public async Task<IEnumerable<Categoria>> GetCategoriasProdutos()
         {
-            return Get().Include(x => x.Produtos).ToList();
+            return await Get().Include(x => x.Produtos).ToListAsync();
         }
 
     }

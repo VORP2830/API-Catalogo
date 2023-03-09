@@ -35,7 +35,7 @@ namespace API_Catalogo.Controllers
         {
             try
             {
-                var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters);
+                var produtos = await _uof.ProdutoRepository.GetProdutos(produtosParameters);
                 if (produtos is null)
                 {
                     return NotFound("Produtos não encontrados");
