@@ -7,6 +7,7 @@ using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace API_Catalogo.Controllers
 {
@@ -24,7 +25,7 @@ namespace API_Catalogo.Controllers
         [HttpGet("menorpreco")]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
         {
-            var produtos = _uof.ProdutoRepository.GetProdutoPorPreco().ToList();
+            var produtos = _uof.ProdutoRepository.GetProdutoPorPreco();
             var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
             return produtosDto;
         }
@@ -34,13 +35,23 @@ namespace API_Catalogo.Controllers
         {
             try
             {
-                var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters).ToList();
-                var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
-
+                var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters);
                 if (produtos is null)
                 {
                     return NotFound("Produtos não encontrados");
                 }
+                var metadata = new
+                {
+                    produtos.TotalCount,
+                    produtos.PageSize,
+                    produtos.CurrentPage,
+                    produtos.TotalPages,
+                    produtos.HasNext,
+                    produtos.HasPrevious
+                };
+
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+                var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
                 return produtosDto;
             }
             catch (Exception)

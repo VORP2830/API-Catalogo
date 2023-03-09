@@ -2,6 +2,8 @@
 using API_Catalogo.Models;
 using API_Catalogo.Pagination;
 using APICatalogo.Repository;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace API_Catalogo.Repository
 {
@@ -10,17 +12,16 @@ namespace API_Catalogo.Repository
         public ProdutoRepository(AppDbContext contexto) : base(contexto)
         {
         }
-        public IEnumerable<Produto> GetProdutos(ProdutosParameters produtosParameters)
+        public PagedList<Produto> GetProdutos(ProdutosParameters produtosParameters)
         {
-            return Get()
-                .OrderBy(on => on.Nome)
-                .Skip((produtosParameters.PageNumber - 1) * produtosParameters.PageSize)
-                .Take(produtosParameters.PageSize)
-                .ToList();
+            return PagedList<Produto>.ToPagedList(Get().OrderBy(on => on.ProdutoId),
+                produtosParameters.PageNumber, 
+                produtosParameters.PageSize);
         }
-        public IEnumerable<Produto> GetProdutoPorPreco()
+        public async Task<IEnumerable<Produto>> GetProdutoPorPreco()
         {
-            return Get().OrderBy(x => x.Preco).ToList();
+            return await Get().OrderBy(x => x.Preco).ToListAsync();
         }
     }
 }
+

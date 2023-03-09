@@ -1,9 +1,11 @@
 ﻿using API_Catalogo.DTOs;
 using API_Catalogo.Filters;
 using API_Catalogo.Models;
+using API_Catalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace API_Catalogo.Controllers
 {
@@ -21,18 +23,26 @@ namespace API_Catalogo.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get()
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
         {
             try
             {
-                var categorias = _uof.CategoriaRepository.Get().ToList();
-                var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
-
-                if (categorias is null || !categorias.Any())
+                var categorias = _uof.CategoriaRepository.GetCategoriasPaginas(categoriasParameters);
+                if (categorias is null)
                 {
                     return NotFound("Categorias não encontradas");
                 }
-
+                var metadata = new
+                {
+                    categorias.TotalCount,
+                    categorias.PageSize,
+                    categorias.CurrentPage,
+                    categorias.TotalPages,
+                    categorias.HasNext,
+                    categorias.HasPrevious
+                };
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+                var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
                 return categoriasDto;
             }
             catch (Exception)
