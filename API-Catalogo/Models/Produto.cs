@@ -11,7 +11,7 @@ namespace API_Catalogo.Models
         [StringLength(20, ErrorMessage = "O nome deve ter entre 5 e 20 caracteres", MinimumLength = 5)]
         public string? Nome { get; set; }
         [Required(ErrorMessage ="A descrição é obrigatoria")]
-        [StringLength (10, ErrorMessage = "A descrição deve ter no maximo {1} caracteres")] 
+        [StringLength (300, ErrorMessage = "A descrição deve ter no maximo {1} caracteres")] 
         public string? Descricao { get; set; }
         [Required(ErrorMessage = "O preço é obrigatorio")]
         [Range(1, 10000, ErrorMessage = "O preço de estar entre {1} e {2}")]
