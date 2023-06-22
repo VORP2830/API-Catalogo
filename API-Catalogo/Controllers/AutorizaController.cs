@@ -94,9 +94,10 @@ namespace API_Catalogo.Controllers
             };
 
             //gera uma chave com base em um algoritmo simetrico
-            var json = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:key"]));
+            var json = _configuration["Jwt:key"];
             var enviroment = Environment.GetEnvironmentVariable("KEY");
-            var key = !string.IsNullOrEmpty(enviroment) ? new SymmetricSecurityKey(Encoding.UTF8.GetBytes(enviroment)) : json;
+            var keyBytes = !string.IsNullOrEmpty(enviroment) ? Encoding.UTF8.GetBytes(enviroment) : Encoding.UTF8.GetBytes(json);
+            var key = new SymmetricSecurityKey(keyBytes);
 
             //gera a assinatura digital do token usando o algoritmo Hmac e a chave privada
             var credenciais = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
