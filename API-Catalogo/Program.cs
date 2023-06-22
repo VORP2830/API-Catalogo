@@ -27,7 +27,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ApiCatalogo", Version = "v1" });
 
-    //resolvendo conflitos de versï¿½es no swagger
+    //resolvendo conflitos de versões no swagger
     c.ResolveConflictingActions(c => c.First());
 
 
@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Header de autorizaï¿½ï¿½o JWT usando o esquema Bearer. \r\n\r\nInforme 'Bearer' [espaï¿½o] e o seu token.\r\n\r\nExemplo: \'Bearer 12345abcdef\' ",
+        Description = "Header de autorização JWT usando o esquema Bearer. \r\n\r\nInforme 'Bearer' [espaço] e o seu token.\r\n\r\nExemplo: \'Bearer 12345abcdef\' ",
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -57,14 +57,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-string stringConection = Environment.GetEnvironmentVariable("DATABASE");
 string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
-string connectionString = !string.IsNullOrEmpty(stringConection) ? stringConection : mySqlConnection;
-
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-
+                options.UseMySql(mySqlConnection,
+                ServerVersion.AutoDetect(mySqlConnection)));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
