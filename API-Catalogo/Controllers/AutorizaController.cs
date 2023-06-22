@@ -102,13 +102,10 @@ namespace API_Catalogo.Controllers
             var credenciais = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             //tempo de expiração do token
-            var expiracao = _configuration["TokenConfiguration:ExpireHours"];
-            var expiration = DateTime.UtcNow.AddHours(double.Parse(expiracao));
+            var expiration = DateTime.UtcNow.AddHours(double.Parse("2"));
 
             //classe que representa um token Jwt e gera o token
             JwtSecurityToken token = new JwtSecurityToken(
-                issuer: _configuration["TokenConfiguration:Issuer"],
-                audience: _configuration["TokenConfiguration:Audience"],
                 claims: claims,
                 expires: expiration,
                 signingCredentials: credenciais);
