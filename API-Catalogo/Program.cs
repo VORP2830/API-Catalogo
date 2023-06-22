@@ -62,8 +62,6 @@ string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConne
 
 string connectionString = !string.IsNullOrEmpty(stringConection) ? stringConection : mySqlConnection;
 
-Console.Write(connectionString);
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
